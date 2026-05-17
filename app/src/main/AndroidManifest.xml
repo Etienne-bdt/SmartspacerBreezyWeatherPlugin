@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="nodomain.freeyourgadget.gadgetbridge.permission.RECEIVE_WEATHER" />
+    <uses-permission android:name="com.kieronquinn.app.smartspacer.permission.ACCESS_SMARTSPACER_TARGETS" />
+    <uses-permission android:name="org.breezyweather.permission.ACCESS_WEATHER" />
+    <uses-permission android:name="org.breezyweather.permission.READ_WEATHER" />
+    <uses-permission android:name="org.breezyweather.READ_PROVIDER" />
+    <uses-permission android:name="org.breezyweather.permission.READ_PROVIDER" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <queries>
+        <package android:name="org.breezyweather" />
+        <provider android:authorities="org.breezyweather.provider.weather" />
+        <provider android:authorities="org.breezyweather.weather.provider" />
+        <provider android:authorities="org.breezyweather.provider" />
+        <provider android:authorities="org.breezyweather.contentprovider" />
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SmartspacerBreezyWeatherPlugin">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.SmartspacerBreezyWeatherPlugin">
+            <intent-filter>
+                <action android:name="org.breezyweather.action.DATA_SHARING_CLIENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".WeatherReceiver"
+            android:exported="true"
+            android:label="Smartspacer BreezyWeather Plugin">
+            <intent-filter>
+                <action android:name="nodomain.freeyourgadget.gadgetbridge.ACTION_GENERIC_WEATHER" />
+                <action android:name="org.breezyweather.ACTION_UPDATE_NOTIFIER" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name=".SmartspacerWeatherTarget"
+            android:authorities="${applicationId}.weather_target"
+            android:exported="true"
+            android:permission="com.kieronquinn.app.smartspacer.permission.ACCESS_SMARTSPACER_TARGETS">
+            <intent-filter>
+                <action android:name="com.kieronquinn.app.smartspacer.TARGET" />
+            </intent-filter>
+        </provider>
+    </application>
+
+</manifest>
