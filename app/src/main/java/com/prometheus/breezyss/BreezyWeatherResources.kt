@@ -1,6 +1,7 @@
 package com.prometheus.breezyss
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import androidx.core.content.res.ResourcesCompat
@@ -9,12 +10,9 @@ object BreezyWeatherResources {
 
     private const val PACKAGE_NAME = "org.breezyweather"
 
-    fun getRemoteContext(context: Context, packageName: String = PACKAGE_NAME): Context? {
+    private fun getRemoteResources(context: Context, packageName: String = PACKAGE_NAME): Resources? {
         return try {
-            context.createPackageContext(
-                packageName,
-                Context.CONTEXT_IGNORE_SECURITY
-            )
+            context.packageManager.getResourcesForApplication(packageName)
         } catch (e: Exception) {
             null
         }
@@ -28,12 +26,11 @@ object BreezyWeatherResources {
         resourceName: String
     ): Drawable? {
         if (resourceName.isEmpty()) return null
-        val remote = getRemoteContext(context) ?: return null
+        val resources = getRemoteResources(context) ?: return null
 
-        val resId = remote.resources.getIdentifier(resourceName, "drawable", PACKAGE_NAME)
-        android.util.Log.d("BreezyResources", "getWeatherDrawable: $resourceName -> resId: $resId")
+        val resId = resources.getIdentifier(resourceName, "drawable", PACKAGE_NAME)
         if (resId != 0) {
-            return ResourcesCompat.getDrawable(remote.resources, resId, null)
+            return ResourcesCompat.getDrawable(resources, resId, null)
         }
         return null
     }
@@ -46,10 +43,9 @@ object BreezyWeatherResources {
         resourceName: String
     ): Icon? {
         if (resourceName.isEmpty()) return null
-        val remote = getRemoteContext(context) ?: return null
+        val resources = getRemoteResources(context) ?: return null
 
-        val resId = remote.resources.getIdentifier(resourceName, "drawable", PACKAGE_NAME)
-        android.util.Log.d("BreezyResources", "getWeatherIcon: $resourceName -> resId: $resId")
+        val resId = resources.getIdentifier(resourceName, "drawable", PACKAGE_NAME)
         if (resId != 0) {
             return Icon.createWithResource(PACKAGE_NAME, resId)
         }

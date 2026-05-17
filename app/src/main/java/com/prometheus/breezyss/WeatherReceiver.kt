@@ -14,13 +14,15 @@ import java.util.zip.GZIPInputStream
 class WeatherReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
-        Log.d("WeatherReceiver", "onReceive: $action")
         
         if (action == "nodomain.freeyourgadget.gadgetbridge.ACTION_GENERIC_WEATHER" ||
             action == "org.breezyweather.ACTION_UPDATE_NOTIFIER"
         ) {
             val locationIds = intent.getStringArrayExtra("AllLocationIds")
-            val idToQuery = locationIds?.firstOrNull() ?: "gps"
+            val idToQuery = (locationIds?.firstOrNull() ?: "gps")
+                .filter { it.isLetterOrDigit() || it == '_' || it == '-' || it == ':' }
+                .take(64)
+                .ifEmpty { "gps" }
             queryBreezyProvider(context, idToQuery)
         }
     }
@@ -30,8 +32,7 @@ class WeatherReceiver : BroadcastReceiver() {
         val uri = Uri.parse("content://$authority/weather")
         
         try {
-            val selection = "id = $locationId"
-            val cursor = context.contentResolver.query(uri, null, selection, null, null)
+            val cursor = context.contentResolver.query(uri, null, "id = ?", arrayOf(locationId), null)
             
             cursor?.use {
                 if (it.moveToFirst()) {
@@ -40,7 +41,6 @@ class WeatherReceiver : BroadcastReceiver() {
                     
                     if (weatherBlob != null) {
                         val jsonStr = decompressGzip(weatherBlob)
-                        Log.d("WeatherReceiver", "Breezy Weather JSON: $jsonStr")
                         val json = JSONObject(jsonStr)
                         
                         val current = json.optJSONObject("current")
@@ -66,8 +66,6 @@ class WeatherReceiver : BroadcastReceiver() {
                         val cleanStatus = statusCode?.lowercase()?.replace(" ", "_")
                         val resourceName = "weather_$cleanStatus"
                         val shortcutName = "weather_$cleanStatus"
-
-                        Log.d("WeatherReceiver", "Status: $statusCode -> Resource: $resourceName, Shortcut: $shortcutName")
 
                         val tempObj = current?.optJSONObject("temperature")?.optJSONObject("temperature")
                         val temp = tempObj?.optDouble("value", Double.NaN)?.toInt() ?: -1
